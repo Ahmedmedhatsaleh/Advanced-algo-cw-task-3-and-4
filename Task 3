@@ -1,0 +1,120 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <algorithm>
+using namespace std;
+struct Node {
+    string key;
+    Node* left;
+    Node* right;
+    int height;
+    Node(string k) : key(k), left(nullptr), right(nullptr), height(1) {}
+};
+class avltrees {
+public:
+    Node* insert(Node* node, const string& key) {
+        if (!node) return new Node(key);
+        if (key < node->key)
+            node->left = insert(node->left, key);
+        else if (key > node->key)
+            node->right = insert(node->right, key);
+        else
+            return node; 
+        node->height = 1 + max(getHeight(node->left), getHeight(node->right));
+        int balance = getBalance(node);
+        if (balance > 1 && key < node->left->key)
+            return rightRotate(node);
+        if (balance < -1 && key > node->right->key)
+            return leftRotate(node);
+        if (balance > 1 && key > node->left->key) {
+            node->left = leftRotate(node->left);
+            return rightRotate(node);
+        }
+        if (balance < -1 && key < node->right->key) {
+            node->right = rightRotate(node->right);
+            return leftRotate(node);
+        }
+        return node;
+    }
+    void findPrefix(Node* root, const string& prefix, vector<string>& results) {
+        if (!root) return;
+        if (root->key.compare(0, prefix.size(), prefix) == 0)
+            results.push_back(root->key);
+        if (root->left && root->key >= prefix)
+            findPrefix(root->left, prefix, results);
+        if (root->right && root->key <= prefix + char(255))
+            findPrefix(root->right, prefix, results);
+    }
+private:
+    int getHeight(Node* n) { return n ? n->height : 0; }
+    int getBalance(Node* n) { return n ? getHeight(n->left) - getHeight(n->right) : 0; }
+    Node* rightRotate(Node* y) {
+        Node* x = y->left;
+        Node* T2 = x->right;
+        x->right = y;
+        y->left = T2;
+        y->height = 1 + max(getHeight(y->left), getHeight(y->right));
+        x->height = 1 + max(getHeight(x->left), getHeight(x->right));
+        return x;
+    }
+    Node* leftRotate(Node* x) {
+        Node* y = x->right;
+        Node* T2 = y->left;
+        y->left = x;
+        x->right = T2;
+        x->height = 1 + max(getHeight(x->left), getHeight(x->right));
+        y->height = 1 + max(getHeight(y->left), getHeight(y->right));
+        return y;
+    }
+};
+int main() {
+    avltrees tree; 
+    Node* root = nullptr;
+    vector<string> dictionary = {
+        "ace","act","action","active","actor","add","address","admin","advantage","and",
+        "back","background","backup","balance","ball","ban","band","bank","bar","base",
+        "call","camp","cat","catch","compile","compiler","compute","computer","computing","constant",
+        "data","database","date","day","deal","debug","debugger","delete","demo","develop",
+        "edit","editor","effect","element","email","engine","engineer","enter","entry","error",
+        "face","factor","fail","false","fast","file","files","filesystem","filter","find",
+        "game","gate","generate","generic","get","git","github","global","go","graph",
+        "hand","handle","handler","hash","hashtag","head","header","heap","help","host",
+        "icon","id","if","image","import","in","index","init","input","install",
+        "jar","java","javascript","job","join","journal","journey","joy","json","jump",
+        "key","keyboard","keydown","keyframe","keynote","keypad","keystore","keyup","keyword","keys",
+        "label","last","layer","layout","lead","learn","left","link","list","load",
+        "macro","mail","main","manage","manager","map","margin","master","memory","merge",
+        "name","namespace","nav","navigate","navigation","net","network","new","node","note",
+        "object","observe","observer","offline","online","open","operator","option","order","output",
+        "pack","package","packet","page","parallel","parameter","parse","parser","path","post",
+        "query","question","queue","quick","quicksort","quiet","quit","quiz","quota","quote",
+        "race","radio","range","rank","react","read","record","recursive","refactor","register",
+        "save","scan","scanner","scope","screen","script","scroll","search","server","stack",
+        "table","tag","target","task","team","temp","template","test","testing","text",
+        "ui","unit","unittest","unix","update","upgrade","upload","url","user","username",
+        "val","validate","validation","value","var","variable","vector","version","view","virtual",
+        "wait","warn","warning","web","webhook","webkit","webpack","website","while","window",
+        "xml","xmlns","xor","xpath","xquery","xref","xss","xsl","xslt","x-axis",
+        "yacht","yard","yarn","year","yearly","yellow","yesterday","yield","you","your",
+        "zero","zebra","zip","zipper","zigzag","zone","zombie","zoom","zoomin","zoomout"
+    };
+    for (const auto& word : dictionary)
+        root = tree.insert(root, word);
+    string prefix;
+    while (true) {
+        cout << "Enter your prefix: ";
+        getline(cin, prefix);
+        if (prefix.empty()) break;
+        vector<string> results;
+        tree.findPrefix(root, prefix, results);
+        if (!results.empty()) {
+            sort(results.begin(), results.end());
+            cout << "Suggested options: ";
+            for (auto& w : results) cout << w << " ";
+            cout << endl;
+        } else {
+            cout << "No words found." << endl;
+        }
+    }
+    return 0;
+}
