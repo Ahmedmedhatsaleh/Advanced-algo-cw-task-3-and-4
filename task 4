@@ -1,0 +1,23 @@
+#include <iostream>
+#include <algorithm>
+#include <string>
+using namespace std;
+bool checkanagram(string word, string word2) {
+    if (word.length() != word2.length())
+        return false;
+    sort(word.begin(), word.end());
+    sort(word2.begin(), word2.end());
+    return word == word2;
+}
+int main() {
+    string word1, word2;
+    cout << "Enter your word: ";
+    cin >> word1;
+    cout << "Enter your second word: ";
+    cin >> word2;
+    if (checkanagram(word1, word2))
+        cout << "The words are anagrams." << endl;
+    else
+        cout << "The words are not anagrams." << endl;
+    return 0;
+}
